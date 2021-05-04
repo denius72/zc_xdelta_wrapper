@@ -81,7 +81,7 @@ public class dialog2 extends JDialog {
 	public dialog2() {
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setResizable(false);
-		setTitle("zc_xdelta_wrapper 1.0");
+		setTitle("zc_xdelta_wrapper 1.1");
 		setBounds(0, 0, 800, 338);
 		getContentPane().setLayout(null);
 		contentPanel.setBounds(0, 0, 0, 0);
