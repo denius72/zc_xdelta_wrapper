@@ -18,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -29,6 +31,8 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.bind.DatatypeConverter;
+
 import java.awt.Toolkit;
 
 public class dialog2 extends JDialog {
@@ -350,23 +354,23 @@ public class dialog2 extends JDialog {
 
 					//f = f.replace(name, "");
 					//f = f.substring(0, f.length() -1);
-					  System.out.println(listFile[i].getPath());
+					  //System.out.println(listFile[i].getPath());
 					  
 					  String pathnoname = listFile[i].getPath();
 					  pathnoname = pathnoname.replace(listFile[i].getName(), "");
-					  System.out.println(pathnoname);
+					  //System.out.println(pathnoname);
 					  
 					  String namenopath = listFile[i].getPath();
 					  namenopath = namenopath.replace(pattern.toString(), "");
-					  System.out.println("name: "+namenopath);
+					  //System.out.println("name: "+namenopath);
 					  
 					  String s = listFile[i].getPath();
 					  s = s.replace(pattern.toString(), dir2.getPath());
-					  System.out.println(s);
+					  //System.out.println(s);
 					  String s2 = listFile[i].getPath();
 					  s2 = s2.replace(pattern.toString(), dir3.getPath()+"\\vcdiff");
 					  s2 += ".vcdiff";
-					  System.out.println(s2);
+					  //System.out.println(s2);
 					  
 					  String dir = pathnoname.replace(pattern.toString(), dir3.getPath()+"\\vcdiff");
 					  
@@ -377,28 +381,42 @@ public class dialog2 extends JDialog {
 					  FileWriter myWriter; 
 					  FileWriter myWriter2; 
 					  
-					try {
-					  myWriter = new FileWriter(fbat, true);
-					  //myWriter.write(".\\"+dir4+" "+param+" \""+listFile[i].getPath()+"\" \""+s+"\" \""+s2+"\""+"\n");
-					  myWriter.write(".\\xdelta-3.1.0-x86_64.exe "+param+" \""+listFile[i].getPath()+"\" \""+s+"\" \""+s2+"\""+"\n");
-				      myWriter.close();
-				      
-					  myWriter2 = new FileWriter(applypatch, true);
-					  myWriter2.write("rename \"."+namenopath+"\" \""+listFile[i].getAbsolutePath().substring(listFile[i].getAbsolutePath().lastIndexOf("\\")+1)+".bak\" ");
-					  myWriter2.write("\n.\\xdelta.exe "+patchparam+" \"."+namenopath+".bak\" \".\\vcdiff"+namenopath+".vcdiff\" \"."+namenopath+"\""+System.getProperty( "line.separator" ));
-					  //myWriter2.write("move \".\\"+namenopath+"\" old");
-				      myWriter2.close();
-				      
-
-				      //FileWriter myWriter3 = new FileWriter(applypatch, true);
-					  //myWriter3.write("move \"."+namenopath+"\" old");
-					  //myWriter3.close();
-					  //TO DO: fazer com que o executável do xdelta não seja hard coded
-					  
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					 
+						try {
+						  
+						  byte[] a = Files.readAllBytes(Paths.get(s));
+						  byte[] hasha = MessageDigest.getInstance("MD5").digest(a);
+						  byte[] b = Files.readAllBytes(Paths.get(listFile[i].getPath()));
+						  byte[] hashb = MessageDigest.getInstance("MD5").digest(b);
+						  String shasha = DatatypeConverter.printHexBinary(hasha);
+						  String shashb = DatatypeConverter.printHexBinary(hashb);
+						  System.out.println("S: "+s+" HASH: "+shasha);
+						  System.out.println("listFile[i]: "+listFile[i].getPath()+" HASH: "+shashb);
+						  
+						  if(!shasha.toString().contentEquals(shashb.toString()))
+						  {
+							  System.out.println("DIFERENÇA ENCONTRADA...");
+							  myWriter = new FileWriter(fbat, true);
+							  //myWriter.write(".\\"+dir4+" "+param+" \""+listFile[i].getPath()+"\" \""+s+"\" \""+s2+"\""+"\n");
+							  myWriter.write(".\\xdelta-3.1.0-x86_64.exe "+param+" \""+listFile[i].getPath()+"\" \""+s+"\" \""+s2+"\""+"\n");
+						      myWriter.close();
+						      
+							  myWriter2 = new FileWriter(applypatch, true);
+							  myWriter2.write("rename \"."+namenopath+"\" \""+listFile[i].getAbsolutePath().substring(listFile[i].getAbsolutePath().lastIndexOf("\\")+1)+".bak\" ");
+							  myWriter2.write("\n.\\xdelta.exe "+patchparam+" \"."+namenopath+".bak\" \".\\vcdiff"+namenopath+".vcdiff\" \"."+namenopath+"\""+System.getProperty( "line.separator" ));
+							  //myWriter2.write("move \".\\"+namenopath+"\" old");
+						      myWriter2.close();
+						  }
+						 
+						  //TO DO: fazer com que o executável do xdelta não seja hard coded
+						  
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (NoSuchAlgorithmException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 				      
                 }
             }
